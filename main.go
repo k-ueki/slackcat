@@ -212,7 +212,11 @@ func main() {
 			if fileName == "" {
 				fileName = filepath.Base(filePath)
 			}
-			slackcat.postFile(filePath, fileName, fileType, fileComment)
+			fi, err := os.Stat(filePath)
+			if err != nil {
+				exitErr(fmt.Errorf("cannot fetch the file info: %s", filePath))
+			}
+			slackcat.postFile(filePath, fileName, fileType, fileComment, int(fi.Size()))
 			os.Exit(0)
 		}
 
@@ -233,7 +237,11 @@ func main() {
 		} else {
 			filePath := writeTemp(scanner.StreamBytes())
 			defer os.Remove(filePath)
-			slackcat.postFile(filePath, fileName, fileType, fileComment)
+			fi, err := os.Stat(filePath)
+			if err != nil {
+				exitErr(fmt.Errorf("cannot fetch the file info: %s", filePath))
+			}
+			slackcat.postFile(filePath, fileName, fileType, fileComment, int(fi.Size()))
 			os.Exit(0)
 		}
 	}

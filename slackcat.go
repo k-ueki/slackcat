@@ -11,7 +11,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-//Slackcat client
+// Slackcat client
 type Slackcat struct {
 	queue       *StreamQ
 	shutdown    chan os.Signal
@@ -123,7 +123,7 @@ func (sc *Slackcat) postMsg(msglines []string) {
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
 }
 
-func (sc *Slackcat) postFile(filePath, fileName, fileType, fileComment string) {
+func (sc *Slackcat) postFile(filePath, fileName, fileType, fileComment string, fileSize int) {
 	//default to timestamp for filename
 	if fileName == "" {
 		fileName = strconv.FormatInt(time.Now().Unix(), 10)
@@ -135,13 +135,13 @@ func (sc *Slackcat) postFile(filePath, fileName, fileType, fileComment string) {
 	}
 
 	start := time.Now()
-	_, err := api.UploadFile(slack.FileUploadParameters{
+	_, err := api.UploadFileV2(slack.UploadFileV2Parameters{
 		File:           filePath,
+		FileSize:       fileSize,
 		Filename:       fileName,
-		Filetype:       fileType,
 		Title:          fileName,
 		InitialComment: fileComment,
-		Channels:       []string{sc.channelID},
+		Channel:        sc.channelID,
 	})
 	failOnError(err, "error uploading file to Slack")
 	duration := strconv.FormatFloat(time.Since(start).Seconds(), 'f', 3, 64)
